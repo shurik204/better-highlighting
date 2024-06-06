@@ -1,0 +1,7 @@
+{
+  "text.betterhighlighting.debug.scopes": "Scopes debug tooltip: %s",
+  "text.betterhighlighting.debug.reloading_config": "Reloading config...",
+  "text.betterhighlighting.current_theme": "Current theme: %s",
+  "text.betterhighlighting.changed_theme": "Changed theme to '%s'",
+  "text.betterhighlighting.theme_not_found": "Theme '%s' does not exist"
+}
