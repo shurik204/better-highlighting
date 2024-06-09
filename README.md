@@ -24,5 +24,18 @@ To switch themes, type `/betterhighlighting theme <theme>` in the chat. Command 
 - `Material`. License: Apache 2.0 | [Repository](https://github.com/material-theme/vsc-material-theme)
 - `Monokai`. License: MIT | [Repository](https://github.com/microsoft/vscode)
 
+## Using the API
+To use the API, add the following repository to your `build.gradle`:
+```gradle
+maven {
+    url "https://maven.shurik.me/releases"
+}
+```
+Then add this mod as a dependency:
+```gradle
+modImplementation "me.shurik:better-highlighting:<version>"
+``` 
+Replace `<version>` with the version you want to use. You can view the list of versions [here](https://maven.shurik.me/#/releases/me/shurik/better-highlighting).
+
 ### Credits
 This mod uses TextMate grammar library [TM4E](https://github.com/eclipse/tm4e) and a slightly modified version of [syntax-mcfunction](https://github.com/MinecraftCommands/syntax-mcfunction) grammar.

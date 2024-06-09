@@ -136,13 +136,34 @@ tasks {
             minecraftVersions.add(property("minecraft_version"))
             requires("fabric-api")
         }
+    }
 
-        // Fix machete compression
-        getTasksByName("publishModrinth", true).forEach {
-            it.dependsOn("optimizeOutputsOfRemapJar")
+    publishing {
+        publications {
+            create<MavenPublication>("jar") {
+                repositories {
+                    maven(System.getenv("MAVEN_URL")) {         // Maven repository URL
+                        credentials {
+                            username=System.getenv("MAVEN_USER")
+                            password=System.getenv("MAVEN_PASSWORD")
+                        }
+                    }
+                }
+                groupId = group
+                artifactId = modId
+
+                artifact(remapJar)
+                artifact(remapSourcesJar)
+            }
         }
-        getTasksByName("publishCurseforge", true).forEach {
-            it.dependsOn("optimizeOutputsOfRemapJar")
+    }
+
+    // Fix machete compression
+    getAllTasks(true).forEach {
+        for (task in it.value) {
+            if (task.name.startsWith("publish")) {
+                task.dependsOn("optimizeOutputsOfRemapJar")
+            }
         }
     }
 }
