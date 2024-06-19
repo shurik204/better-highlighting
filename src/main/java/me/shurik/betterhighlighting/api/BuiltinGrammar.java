@@ -27,6 +27,9 @@ public final class BuiltinGrammar {
         TextMateResourceLoader.instance().registerReloadListener((registry -> {
             MCFUNCTION_GRAMMAR = registry.getSourceGrammar("mcfunction");
             JSON = registry.getSourceGrammar("json");
+            if (MCFUNCTION_GRAMMAR == null || JSON == null) {
+                throw new IllegalStateException("Failed to load built-in grammars");
+            }
         }));
     }
 }
