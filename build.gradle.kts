@@ -4,8 +4,8 @@ plugins {
     id("io.github.p03w.machete") version "1.1.4" // Build jar compression
     id("me.modmuss50.mod-publish-plugin") version "0.4.5" // Mod publishing
 
-    `maven-publish` // Maven publishing
-    java
+    id("maven-publish") // Maven publishing
+    id("java")
 }
 
 //////
@@ -152,8 +152,8 @@ tasks {
                 groupId = group
                 artifactId = modId
 
-                artifact(remapJar)
-                artifact(remapSourcesJar)
+                // Includes jar, sources and dependencies
+                from(project.components["java"])
             }
         }
     }
@@ -161,7 +161,8 @@ tasks {
     // Fix machete compression
     getAllTasks(true).forEach {
         for (task in it.value) {
-            if (task.name.startsWith("publish")) {
+            // All publishing tasks depend on the remapJar task. But also metadata generation.
+            if (task.name.startsWith("publish") || task.name == "generateMetadataFileForJarPublication") {
                 task.dependsOn("optimizeOutputsOfRemapJar")
             }
         }
