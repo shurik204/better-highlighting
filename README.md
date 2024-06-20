@@ -25,11 +25,10 @@ To switch themes, type `/betterhighlighting theme <theme>` in the chat. Command 
 - `Monokai`. License: MIT | [Repository](https://github.com/microsoft/vscode)
 
 ## Using the API
-To use the API, add the following repository to your `build.gradle`:
+To use the API, add the following repositories to your `build.gradle`:
 ```gradle
-maven {
-    url "https://maven.shurik.me/releases"
-}
+maven { url "https://maven.shurik.me/releases" } // Better Highlighting
+maven { url "https://maven.shurik.me/central" } // TM4E artifacts
 ```
 Then add this mod as a dependency:
 ```gradle
