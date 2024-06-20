@@ -26,7 +26,7 @@ jobs:
           workflow_id: release.yml
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
-      - run: ./gradlew build publishMods --stacktrace --no-daemon
+      - run: ./gradlew build publish publishMods --stacktrace --no-daemon
         env:
           REPOSITORY_NAME: ${{ github.event.repository.name }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
