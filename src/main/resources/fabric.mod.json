@@ -20,7 +20,7 @@
     "better-highlighting.mixins.json"
   ],
   "depends": {
-    "java": "${modJava}",
+    "java": ">=${modJava}",
     "fabricloader": ">=${modLoader}",
     "fabric-resource-loader-v0": "*",
     "fabric-command-api-v2": "*",
