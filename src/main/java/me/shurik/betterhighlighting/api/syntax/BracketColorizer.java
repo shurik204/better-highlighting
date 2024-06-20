@@ -11,21 +11,43 @@ import java.util.List;
 
 /**
  * Bracket pair colorizer.
- * Default implementation uses a single index for all bracket types to determine the color.
+ * <p>
+ *   Default implementation uses a single index for all bracket types to determine the color.
+ * </p>
  * @see me.shurik.betterhighlighting.util.bracket.SimpleBracketColorizer
  * @see me.shurik.betterhighlighting.util.bracket.BracketTypeAwareColorizer
  */
 public interface BracketColorizer {
+    /**
+     * Create a new bracket colorizer.
+     * @return bracket colorizer
+     */
     static BracketColorizer create() {
         return BaseBracketColorizer.create(TextMateRegistry.instance().getBracketStyles(), Config.INSTANCE.bracketIndependentColoring);
     }
 
+    /**
+     * Get the style for the given bracket.
+     * @param bracket bracket
+     * @return minecraft text style
+     */
     default Style getBracketStyle(String bracket) {
         return getBracketStyle(BracketType.fromChar(bracket.charAt(0)));
     }
 
+    /**
+     * Get the style for the given bracket type.
+     * @param bracketType bracket type
+     * @return minecraft text style
+     */
     Style getBracketStyle(BracketType bracketType);
 
+    /**
+     * Check if the token should be consumed by the bracket colorizer.
+     * @param token token
+     * @param bracket bracket
+     * @return true if the token should be passed to {@link #getBracketStyle}
+     */
     static boolean shouldConsume(IToken token, String bracket) {
         //                                         /                🩼             / replacing with getLast() screws up compilation fsr
         if (bracket.isBlank() || token.getScopes().get(token.getScopes().size() - 1).startsWith("string")) {
@@ -35,7 +57,7 @@ public interface BracketColorizer {
         if (bracket.length() == 1 && BracketType.fromChar(bracket.charAt(0)) != null) {
             return true;
         }
-        // or only contains bracket characters of the same type
+        // or only contains bracket characters
         BracketType type = BracketType.fromString(bracket.substring(0, 1));
         if (type == null) {
             return false;
@@ -43,6 +65,9 @@ public interface BracketColorizer {
         return bracket.chars().allMatch(c -> c == ')' || c == ']' || c == '}');
     }
 
+    /**
+     * Bracket type.
+     */
     enum BracketType {
         PARENTHESIS(0, '(', false),
         CLOSING_PARENTHESIS(0, ')', true),
@@ -65,6 +90,11 @@ public interface BracketColorizer {
             return this.index == other.index && this.closing != other.closing;
         }
 
+        /**
+         * Get the bracket type from a string.
+         * @param s one-character string
+         * @return bracket type, or null if the string is not a bracket
+         */
         @Nullable
         static BracketType fromString(String s) {
             if (s.length() != 1) {
@@ -73,6 +103,11 @@ public interface BracketColorizer {
             return fromChar(s.charAt(0));
         }
 
+        /**
+         * Get the bracket type from a character.
+         * @param c character
+         * @return bracket type, or null if the character is not a bracket
+         */
         @Nullable
         static BracketType fromChar(char c) {
             return switch (c) {
@@ -87,6 +122,12 @@ public interface BracketColorizer {
         }
     }
 
+    /**
+     * Bracket styles holder.
+     * <p>
+     *     To get currently used bracket styles, use {@link TextMateRegistry#getBracketStyles()}.
+     * </p>
+     */
     record BracketStyles(List<Style> styles, Style unmatchedBracketStyle) {
         public Style getStyle(int index) {
             if (index < 0) {
@@ -95,6 +136,12 @@ public interface BracketColorizer {
             return styles.get(index % styles.size());
         }
 
+        /**
+         * Create a new bracket styles holder from a list of colors.
+         * @param bracketStyles list of colors
+         * @param unmatchedBracketColor color for unmatched brackets
+         * @return bracket styles holder
+         */
         public static BracketStyles fromColors(List<Integer> bracketStyles, int unmatchedBracketColor) {
             return new BracketStyles(
                 bracketStyles.stream().map(Style.EMPTY::withColor).toList(),

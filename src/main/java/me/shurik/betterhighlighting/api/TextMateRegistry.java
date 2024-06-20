@@ -14,9 +14,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 
 /**
- * Main TextMate registry to manage loaded grammars and themes.
+ * Main TextMate registry to manage grammars and themes, loaded by {@link TextMateResourceLoader}.
  * <p>
- * Acts as a wrapper for the TM4E {@link Registry}.
+ *   Acts as a wrapper for the TM4E {@link Registry}.
  * </p>
  */
 public interface TextMateRegistry {

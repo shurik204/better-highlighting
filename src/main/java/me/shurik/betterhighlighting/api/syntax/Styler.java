@@ -23,6 +23,9 @@ import java.util.Objects;
 
 /**
  * Utility class for applying formatting to tokens using TextMate themes.
+ * <p>
+ *   To get the current theme get the instance of {@link TextMateRegistry} and call {@link TextMateRegistry#getCurrentTheme()}.
+ * </p>
  */
 public final class Styler {
     private static final TextColor DEFAULT_COLOR = TextColor.fromRgb(CommonColors.WHITE);
@@ -41,7 +44,6 @@ public final class Styler {
         String paddedFullString = fullString + " ";
         BracketColorizer bracketColorizer = BracketColorizer.create();
 
-//        try {
         for (IToken token : tokenizationResult.getTokens()) {
             int substringStart = Math.max(token.getStartIndex() - maxLength, 0);
             int substringEnd = Math.min(token.getEndIndex() - maxLength, part.length());
@@ -60,27 +62,6 @@ public final class Styler {
                 }
             }
         }
-//        } catch (Exception e) {
-//            Minecraft.getInstance().gui.setOverlayMessage(Component.literal(new Random().nextInt() + " | Error formatting text: " + e.getMessage()), false);
-//        }
-
-//////////////////////////////////////////////////////
-//        for (IToken token : tokenizationResult.getTokens()) {
-//            int substringStart = Math.max(token.getStartIndex() - maxLength, 0);
-//            if (substringStart >= string.length()) {
-//                break;
-//            }
-//            int substringEnd = Math.min(token.getEndIndex() - maxLength, string.length());
-//            if (substringEnd > 0) {
-//                String substring = padded.substring(substringStart, substringEnd);
-//                if (BracketColorizer.isBracket(substring)) {
-//                    formattedChars.add(FormattedCharSequence.forward(substring, bracketColorizer.getBracketStyle(substring)));
-//                } else {
-//                    formattedChars.add(FormattedCharSequence.forward(substring, getMinecraftStyle(token, theme)));
-//                }
-//            }
-//        }
-//////////////////////////////////////////////////////
         return FormattedCharSequence.composite(formattedChars);
     }
 
@@ -178,6 +159,7 @@ public final class Styler {
 
     /**
      * Gets the Minecraft style for the given token
+     * @implNote if you need bracket coloring, use {@link #formatTokenAsComponent(IToken, String, Theme, BracketColorizer)}
      * @param token token to get style for
      * @return Minecraft style
      */

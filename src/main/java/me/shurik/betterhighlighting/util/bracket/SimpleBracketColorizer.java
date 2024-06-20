@@ -13,12 +13,13 @@ public class SimpleBracketColorizer extends BaseBracketColorizer {
 
     @Override
     public Style getBracketStyle(BracketType bracketType) {
+        // TODO: Deduplicate the code in BracketTypeAwareColorizer
         if (bracketType.closing) {
             // If we get a closing bracket and there are no opening brackets, we have an unmatched bracket
             if (brackets.isEmpty()) {
                 return styles.unmatchedBracketStyle();
             }
-            // If the closing bracket matches the last opening bracket, we remove it
+            // If the closing bracket matches the last opening bracket, pop it from the stack and return the matching style
             if (bracketType.matchesClosing(brackets.peek())) {
                 int index = brackets.size() - 1;
                 brackets.pop();
@@ -28,7 +29,7 @@ public class SimpleBracketColorizer extends BaseBracketColorizer {
                 return styles.unmatchedBracketStyle();
             }
         }
-        // Opening bracket, add it to the stack and return the style
+        // Opening bracket, push it on to the stack and return the style
         brackets.push(bracketType);
         return styles.getStyle(brackets.size() - 1);
     }
