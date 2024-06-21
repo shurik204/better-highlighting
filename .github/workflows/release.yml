@@ -32,6 +32,6 @@ jobs:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
           CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
           CHANGELOG: ${{ steps.changelog.outputs.changelog }}
-          MAVEN_URL: ${{ env.MAVEN_URL }}
+          MAVEN_URL: ${{ vars.MAVEN_URL }}
           MAVEN_USER: ${{ secrets.MAVEN_USER }}
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
