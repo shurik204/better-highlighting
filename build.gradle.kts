@@ -120,20 +120,20 @@ tasks {
         file = remapJar.get().archiveFile
         changelog = providers.environmentVariable("CHANGELOG").getOrElse("No changelog provided")
         type = BETA
-        displayName = "$modName $minecraftVersion $modVersion"
+        displayName = "$modName $modVersion"
         modLoaders.add("fabric")
         dryRun = providers.environmentVariable("CI").getOrNull() == null
 
         curseforge {
             accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
             projectId = "1032169"
-            minecraftVersions.add(property("minecraft_version"))
+            minecraftVersions.add(minecraftVersion)
             requires("fabric-api")
         }
         modrinth {
             accessToken = providers.environmentVariable("MODRINTH_TOKEN")
             projectId = "rjsZCeTS"
-            minecraftVersions.add(property("minecraft_version"))
+            minecraftVersions.add(minecraftVersion)
             requires("fabric-api")
         }
     }
