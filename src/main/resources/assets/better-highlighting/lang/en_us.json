@@ -1,7 +1,13 @@
 {
+  "text.betterhighlighting.debug.state": "Debug: %s",
   "text.betterhighlighting.debug.scopes": "Scopes debug tooltip: %s",
-  "text.betterhighlighting.debug.reloading_config": "Reloading config...",
+  "text.betterhighlighting.debug.reloaded_config": "Reloaded config",
+  "text.betterhighlighting.debug.unknown_subcommand": "Unknown subcommand '%s'",
+
   "text.betterhighlighting.current_theme": "Current theme: %s",
   "text.betterhighlighting.changed_theme": "Changed theme to '%s'",
-  "text.betterhighlighting.theme_not_found": "Theme '%s' does not exist"
+  "text.betterhighlighting.theme_not_found": "Theme '%s' does not exist",
+
+  "text.betterhighlighting.toggle.enabled": "Enabled",
+  "text.betterhighlighting.toggle.disabled": "Disabled"
 }

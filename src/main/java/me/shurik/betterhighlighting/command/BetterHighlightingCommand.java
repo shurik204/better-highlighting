@@ -12,15 +12,28 @@ import me.shurik.betterhighlighting.api.TextMateRegistry;
 import me.shurik.betterhighlighting.api.syntax.Tokenizer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class BetterHighlightingCommand {
+    public static boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();
+
+    public static final Map<String, Consumer<CommandContext<FabricClientCommandSource>>> DEBUG_COMMANDS = Map.of(
+            "debug", BetterHighlightingCommand::debugToggle,
+            "scopes", BetterHighlightingCommand::debugScopes,
+            "reload", BetterHighlightingCommand::debugReloadConfig,
+            "config", BetterHighlightingCommand::debugConfig,
+            "themes", BetterHighlightingCommand::debugThemesList
+    );
+
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         RequiredArgumentBuilder<FabricClientCommandSource, String> themeArg = ClientCommandManager.argument("theme", StringArgumentType.greedyString()).suggests((context, builder) -> {
             for (String theme : TextMateRegistry.instance().getThemeList()) {
@@ -30,42 +43,31 @@ public class BetterHighlightingCommand {
         }).executes(BetterHighlightingCommand::tryChangeTheme);
 
         LiteralArgumentBuilder<FabricClientCommandSource> themeNode = ClientCommandManager.literal("theme").executes(context -> {
-            sendPrefixedFeedback(context.getSource(), "", Config.INSTANCE.currentTheme);
+            sendPrefixedFeedback(context.getSource(), "text.betterhighlighting.current_theme", Config.INSTANCE.currentTheme);
             return 0;
         }).then(themeArg);
 
         RequiredArgumentBuilder<FabricClientCommandSource, String> debugNode = ClientCommandManager.argument("argument", StringArgumentType.word()).executes(context -> {
             String argument = StringArgumentType.getString(context, "argument");
-            if (argument.equals("scope") || argument.equals("scopes")) {
-                Config.INSTANCE.enableScopesDebug = !Config.INSTANCE.enableScopesDebug;
-                Config.save();
-                sendPrefixedFeedback(context.getSource(), "text.betterhighlighting.debug.scopes", Component.translatable(Config.INSTANCE.enableScopesDebug ? "addServer.resourcePack.enabled" : "addServer.resourcePack.disabled"));
+
+            if (argument.equals("debug")) {
+                debugToggle(context);
+                return 0;
             }
-            if (argument.equals("reload")) {
-                sendPrefixedFeedback(context.getSource(), "text.betterhighlighting.debug.reload");
-                Config.load();
-            }
-            if (argument.equals("config")) {
-                sendPrefixedFeedback(context.getSource(), "Begin config");
-                for (Field field : Config.INSTANCE.getClass().getDeclaredFields()) {
-                    if (Modifier.isStatic(field.getModifiers())) continue;
-                    try {
-                        field.setAccessible(true);
-                        context.getSource().sendFeedback(Component.translatable("%s: %s", field.getName(), field.get(Config.INSTANCE)));
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
-                sendPrefixedFeedback(context.getSource(), "End config");
-            }
-            if (argument.equals("themes")) {
-                Set<String> themes = TextMateRegistry.instance().getThemeList();
-                sendPrefixedFeedback(context.getSource(), "text.betterhighlighting.debug.themes", themes.size());
-                for (String theme : themes) {
-                    sendPrefixedFeedback(context.getSource(), "text.betterhighlighting.debug.theme", theme);
-                }
+
+            if (BetterHighlightingCommand.debug && DEBUG_COMMANDS.containsKey(argument)) {
+                DEBUG_COMMANDS.get(argument).accept(context);
+            } else {
+                sendPrefixedFeedback(context.getSource(), "text.betterhighlighting.debug.unknown_subcommand", argument);
             }
             return 0;
+        }).suggests((context, builder) -> {
+            if (BetterHighlightingCommand.debug) {
+                for (String command : DEBUG_COMMANDS.keySet()) {
+                    if (command.startsWith(builder.getRemaining())) { builder.suggest(command); }
+                }
+            }
+            return builder.buildFuture();
         });
 
         LiteralArgumentBuilder<FabricClientCommandSource> rootNode = ClientCommandManager.literal("betterhighlighting").then(themeNode).then(debugNode);
@@ -101,5 +103,47 @@ public class BetterHighlightingCommand {
 
     private static void sendPrefixedFeedback(FabricClientCommandSource source, Component message) {
         source.sendFeedback(Component.translatable("%s%s", getPrefix(), message));
+    }
+
+    private static String getStateText(boolean state) {
+        return state ? Language.getInstance().getOrDefault("text.betterhighlighting.toggle.enabled") : Language.getInstance().getOrDefault("text.betterhighlighting.toggle.disabled");
+    }
+
+    private static void debugToggle(CommandContext<FabricClientCommandSource> ctx) {
+        BetterHighlightingCommand.debug = !BetterHighlightingCommand.debug;
+        sendPrefixedFeedback(ctx.getSource(), "text.betterhighlighting.debug.state", getStateText(BetterHighlightingCommand.debug));
+    }
+
+    private static void debugScopes(CommandContext<FabricClientCommandSource> ctx) {
+        Config.INSTANCE.enableScopesDebug = !Config.INSTANCE.enableScopesDebug;
+        Config.save();
+        sendPrefixedFeedback(ctx.getSource(), "text.betterhighlighting.debug.scopes", getStateText(Config.INSTANCE.enableScopesDebug));
+    }
+
+    private static void debugReloadConfig(CommandContext<FabricClientCommandSource> ctx) {
+        Config.load();
+        sendPrefixedFeedback(ctx.getSource(), "text.betterhighlighting.debug.reloaded_config");
+    }
+
+    private static void debugThemesList(CommandContext<FabricClientCommandSource> ctx) {
+        Set<String> themes = TextMateRegistry.instance().getThemeList();
+        sendPrefixedFeedback(ctx.getSource(), "text.betterhighlighting.debug.themes", themes.size());
+        for (String theme : themes) {
+            sendPrefixedFeedback(ctx.getSource(), "text.betterhighlighting.debug.theme", theme);
+        }
+    }
+
+    private static void debugConfig(CommandContext<FabricClientCommandSource> ctx) {
+        sendPrefixedFeedback(ctx.getSource(), "Begin config");
+        for (Field field : Config.INSTANCE.getClass().getDeclaredFields()) {
+            if (Modifier.isStatic(field.getModifiers())) continue;
+            try {
+                field.setAccessible(true);
+                ctx.getSource().sendFeedback(Component.translatable("%s: %s", field.getName(), field.get(Config.INSTANCE)));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        sendPrefixedFeedback(ctx.getSource(), "End config");
     }
 }
