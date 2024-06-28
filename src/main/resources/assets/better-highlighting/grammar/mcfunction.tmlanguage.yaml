@@ -15,12 +15,12 @@ repository:
     patterns:
       - include: "#literals"
       - include: "#comments"
-      # we do names before inline to avoid inline's eating up too much
-      - include: "#names"
+      - include: "#say"
+      - include: "#names" # we do names before inline since inline comments can eat
       - include: "#comments_inline"
       - include: "#subcommands"
       - include: "#property"
-      - include: "#operators"
+      - include: "#operators" # ideally not so low but this eats into fakeplayers
       - include: "#selectors"
       # PATCH: add missing whitespace pattern
       - include: "#whitespace"
@@ -31,6 +31,12 @@ repository:
       - match: \s+
         name: whitespace.mcfunction
 
+  # Comments have two styles
+  # 1. Basic `# comment`, single line
+  # 2. `#>`, etc. block comments
+  #
+  # We provide a subset of command highlighting within comments to enable
+  #  docstring-esque type highlighting
   comments:
     patterns:
       - applyEndPatternLast: 1
@@ -53,6 +59,8 @@ repository:
         match: '^\s*#.*$'
         name: meta.comments
 
+  # `execute if entity @a run tellraw "hello"  # cool command here`
+  #                                            ^^^^^^^^^^^^^^^^^^^
   comments_inline:
     patterns:
       - captures:
@@ -82,6 +90,9 @@ repository:
         patterns:
           - include: "#comments_block_normal"
 
+  # Header comments (just bolded)
+  # `#> This function does cool things`
+  #     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   comments_block_emphasized:
     patterns:
       - include: "#comments_block_special"
@@ -91,6 +102,7 @@ repository:
         match: \S+
         name: meta.comments_block_emphasized
 
+  #> Normal comments within a comment block
   comments_block_normal:
     patterns:
       - include: "#comments_block_special"
@@ -101,6 +113,13 @@ repository:
         name: meta.comments_block_normal
       - include: "#whitespace"
 
+  # Special highlighting for resource locations and params
+  # `# Taco Bell @rx97`
+  #              ^^^^^
+  # `# Caching handled by storage:location/over/here`
+  #                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  # `# $mypack.raycast.result return`
+  #    ^^^^^^^^^^^^^^^^^^^^^^
   comments_block_special:
     patterns:
       - captures:
@@ -115,17 +134,13 @@ repository:
         match: "[#%$][A-Za-z0-9_.#%$]+"
         name: meta.comments_block_special
 
+  # Literals encompasses numbers, booleans, UUIDs, and strings
   literals:
     patterns:
       - captures:
           "0":
-            name: literal.mcfunction
-        match: \.\.
-        name: meta.literals
-      - captures:
-          "0":
             name: constant.numeric.boolean.mcfunction
-        match: (true|false|True|False)
+        match: \b(true|false|True|False)\b
         name: meta.literals
       - captures:
           "0":
@@ -140,46 +155,65 @@ repository:
       - captures:
           "0":
             name: constant.numeric.integer.mcfunction
-        match: '[+-]?\d+(b|B|L|l)\b'
+        match: '[+-]?\d+(b|B|L|l|s|S)?\b'
         name: meta.literals
+
+      # yea this should be operator, but i need this to exist before #names
+      # otherwise `..0.5` will be a valid name
       - captures:
           "0":
-            name: constant.numeric.integer.mcfunction
-        match: '[+-]?\d+\b'
-        name: meta.literals
+            name: variable.other.mcfunction
+        match: \.\.
+        name: meta.ellipse.literals
+
+      # Strings will encompass multiple lines meaning an unclosed quote will
+      #  eat extra tokens.
       - applyEndPatternLast: 1
         begin: '"'
-        captures:
+        beginCaptures:
           "0":
-            name: string.quoted.double.mcfunction
-        end: ("|$)
-        name: meta.literals
+            name: punctuation.definition.string.begin.mcfunction
+        end: '"'
+        endCaptures:
+          "0":
+            name: punctuation.definition.string.end.mcfunction
+        name: string.quoted.double.mcfunction
         patterns:
           - include: "#literals_string-double"
       - applyEndPatternLast: 1
         begin: "'"
-        captures:
+        beginCaptures:
           "0":
-            name: string.quoted.single.mcfunction
-        end: ('|$)
-        name: meta.literals
+            name: punctuation.definition.string.begin.mcfunction
+        end: "'"
+        endCaptures:
+          "0":
+            name: punctuation.definition.string.begin.mcfunction
+        name: string.quoted.single.mcfunction
         patterns:
           - include: "#literals_string-single"
 
+  # Simplistic highlighting for basic subcommands.
   subcommands:
     patterns:
       - captures:
           "0":
             name: entity.name.class.mcfunction
-        match: "[A-Za-z_]+"
+        match: "[a-z_]+" # "[A-Za-z_]+"
         name: meta.literals
 
+  # Strings also have to account for `\`s esp, solo at the end of a line
   literals_string-double:
     patterns:
       - captures:
           "0":
             name: constant.character.escape.mcfunction
         match: \\.
+        name: meta.literals_string-double
+      - captures:
+          "0":
+            name: constant.character.escape.mcfunction
+        match: \\
         name: meta.literals_string-double
       - include: "#macro-name"
       - captures:
@@ -195,6 +229,11 @@ repository:
             name: constant.character.escape.mcfunction
         match: \\.
         name: meta.literals_string-single
+      - captures:
+          "0":
+            name: constant.character.escape.mcfunction
+        match: \\
+        name: meta.literals_string-double
       - include: "#macro-name"
       - captures:
           "0":
@@ -202,6 +241,52 @@ repository:
         match: '[^\\'']'
         name: meta.literals_string-single
 
+  # We need to hardcode `say` to avoid greedy `'`s to break formatting
+  # ex: `say Bob's uncle was pretty cool`, this would break commands that follow
+  say:
+    patterns:
+      # PATCH: capture the leading slash
+      - begin: ^(\/?)(\s*)(say)
+        beginCaptures:
+          # PATCH: assign a name to the leading slash
+          "1":
+            name: keyword.operator.mcfunction
+          "2":
+            name: whitespace.mcfunction
+          "3":
+            name: keyword.control.flow.mcfunction
+        end: \n
+        name: meta.say.mcfunction
+        patterns:
+          - captures:
+              "0":
+                name: constant.character.escape.mcfunction
+            match: \\\s*\n
+            meta: meta.say.backslash.mcfunction
+          - include: "#literals_string-double"
+          - include: "#literals_string-single"
+      - begin: (run)(\s+)(say)
+        beginCaptures:
+          "1":
+            name: entity.name.mcfunction
+          "2":
+            name: whitespace.mcfunction
+          "3":
+            name: keyword.control.flow.mcfunction
+        end: \n
+        name: meta.say.mcfunction
+        patterns:
+          - captures:
+              "0":
+                name: constant.character.escape.mcfunction
+            match: \\\s*\n
+            meta: meta.say.backslash.mcfunction
+          - include: "#literals_string-double"
+          - include: "#literals_string-single"
+
+  # Names are a very generic term in this grammar. They specially highlight the
+  #  beginning of a line (and a word after `run`), handle macro commands, and
+  #  fakeplayers.
   names:
     patterns:
       - captures:
@@ -253,6 +338,8 @@ repository:
         match: '([#%$]|((?<=\s)\.))[A-Za-z0-9_.#%$\-]+'
         name: meta.names
 
+  # These are for macro-names defined within a macro-line (including strings).
+  # TODO: only activate this if the beginning of the line starts with `$`
   macro-name:
     patterns:
       - captures:
@@ -266,14 +353,32 @@ repository:
         match: '(\$)\(([A-Za-z0-9_]*)(\))'
         name: meta.macro-name
 
+  # General operators (including beyond mcfunction)
   operators:
     patterns:
       - captures:
           "0":
+            name: constant.numeric.mcfunction
+        match: "[~^]"
+        name: meta.operators
+      - captures:
+          "0":
             name: keyword.operator.mcfunction
-        match: '[\-~%^?!+*<>\\/|&=.:,;]'
+        match: '[\-%?!+*<>\\/|&=.:,;]'
         name: meta.operators
 
+  # Properties are a subset of definitions that exist within `{}`, `[]`, or `()`s. They are a
+  #  generic formula for highlighting key-value pairs, but are also capable of doing a good job
+  #  for generic scoping (such as in mcbuild), JSON, or even python/js esque expressions. They
+  #  can be nested as many times as needed as long as the brackets match!
+  #
+  # Unfortuntely, there's a bit of limitations based on how strict it is with mcfunction
+  #  vs how accepting it is of foreign syntax. For example `[key:val]` and `[key: val]`
+  #  highlight very differently as either a resource-name or a key/value.
+  #
+  # In the future, we could attempt a stricter property key-value scheme and then fall-back
+  #  to a generic, more forgiving highlighting if the strict one fails. This would be complex
+  #  though maybe needing some lookaheads, etc which could be not worth.
   property:
     patterns:
       - applyEndPatternLast: 1
@@ -323,17 +428,17 @@ repository:
     patterns:
       - captures:
           "0":
-            name: entity.name.type.mcfunction
-        match: '#?[a-z_][a-z_\.\-]*\:[a-z0-9_\.\-/]+(?=\s*\=)'
+            name: variable.other.mcfunction
+        match: '#?[a-z_][a-z_\.\-]*\:[a-z0-9_\.\-/]+(?=\s*\=:)'
         name: meta.property_key
       - captures:
           "0":
-            name: entity.name.type.mcfunction
+            name: variable.other.mcfunction
         match: '#?[a-z_][a-z0-9_\.\-/]+'
         name: meta.property_key
       - captures:
           "0":
-            name: entity.name.type.mcfunction
+            name: variable.other.mcfunction
         match: '[A-Za-z_]+[A-Za-z_\-\+]*'
         name: meta.property_key
 
@@ -341,12 +446,12 @@ repository:
     patterns:
       - captures:
           "0":
-            name: entity.name.tag.mcfunction
+            name: string.unquoted.mcfunction
         match: '#?[a-z_][a-z_\.\-]*\:[a-z0-9_\.\-/]+'
         name: meta.property_value
       - captures:
           "0":
-            name: entity.name.tag.mcfunction
+            name: string.unquoted.mcfunction
         match: '#?[a-z_][a-z0-9_\.\-/]+'
         name: meta.property_value
 
@@ -355,7 +460,7 @@ repository:
       - captures:
           "0":
             name: entity.name.function.mcfunction
-        match: "#?[a-z_][a-z_.-]*:[a-z0-9_./-]+"
+        match: "#?[a-z_][a-z0-9_.-]*:[a-z0-9_./-]+"
         name: meta.resource-name
       - captures:
           "0":
@@ -363,6 +468,8 @@ repository:
         match: '#?[a-z0-9_\.\-]+\/[a-z0-9_\.\-\/]+'
         name: meta.resource-name
 
+  # Selectors consume more than 1 char after an `@` symbol to allow for fancier
+  #  `@param` style highlighting like python decorators or even modded selectors.
   selectors:
     patterns:
       - captures:
