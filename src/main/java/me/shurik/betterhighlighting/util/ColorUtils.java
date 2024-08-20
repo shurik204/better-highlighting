@@ -7,7 +7,7 @@ import net.minecraft.network.chat.TextColor;
 import java.util.function.Function;
 
 public class ColorUtils {
-    private static final Function<String, TextColor> HEX_TO_TEXT_COLOR = Util.memoize((hex) -> TextColor.parseColor(hex).getOrThrow());
+    private static final Function<String, TextColor> HEX_TO_TEXT_COLOR = Util.memoize((hex) -> TextColor.parseColor(hex).getOrThrow(false, (error) -> {}));
     private static final Function<Integer, Style> COLOR_TO_STYLE = Util.memoize(Style.EMPTY::withColor);
 
     public static TextColor textColorFromHex(String hex) {

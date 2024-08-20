@@ -44,7 +44,7 @@ public class TextMateResourceLoaderImpl implements IdentifiableResourceReloadLis
 
     @Override
     public ResourceLocation getFabricId() {
-        return ResourceLocation.fromNamespaceAndPath(modId, grammarPath);
+        return new ResourceLocation(modId, grammarPath);
     }
 
     @Override
