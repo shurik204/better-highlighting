@@ -1,6 +1,5 @@
 package me.shurik.betterhighlighting.api.syntax;
 
-import com.mojang.serialization.DataResult;
 import me.shurik.betterhighlighting.api.TextMateRegistry;
 import me.shurik.betterhighlighting.mixin.StyleAccessor;
 import net.minecraft.client.gui.components.EditBox;
@@ -216,7 +215,6 @@ public final class Styler {
      */
     public static TextColor getTextColor(Theme theme, int id) {
         String hex = getColorString(theme, id);
-        DataResult<TextColor> result = TextColor.parseColor(hex);
-        return result.result().orElse(DEFAULT_COLOR);
+        return TextColor.parseColor(hex);
     }
 }
