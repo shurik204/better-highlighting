@@ -37,7 +37,7 @@ base {
 }
 
 repositories {
-    maven("https://maven.shurik.me/central") // TM4E mirror
+    maven("https://repo.eclipse.org/content/repositories/tm4e-snapshots/") // TM4E snapshots
     maven("https://maven.parchmentmc.org") // Parchment mappings
     // maven("https://repo.eclipse.org/content/groups/eclipse")
 }

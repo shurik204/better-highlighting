@@ -28,7 +28,7 @@ To switch themes, type `/betterhighlighting theme <theme>` in the chat. Command 
 To use the API, add the following repositories to your `build.gradle`:
 ```gradle
 maven { url "https://maven.shurik.me/releases" } // Better Highlighting
-maven { url "https://maven.shurik.me/central" } // TM4E artifacts
+maven { url "https://repo.eclipse.org/content/repositories/tm4e-snapshots/" } // TM4E artifacts
 ```
 Then add this mod as a dependency:
 ```gradle
