@@ -36,8 +36,11 @@
   },
   "tokenColors": [
     {
-      "__comment": "PATCH: Add entity.name highlighting",
-      "scope": "entity.name",
+      "__comment": "PATCH: Add entity.name and fix selector highlighting",
+      "scope": [
+        "meta.names",
+        "support.class.mcfunction"
+      ],
       "settings": {
         "foreground": "#569cd6"
       }
