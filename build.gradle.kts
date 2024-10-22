@@ -1,6 +1,6 @@
 
 plugins {
-    id("fabric-loom") version "1.6-SNAPSHOT" // Fabric Loom
+    id("fabric-loom") version "1.8-SNAPSHOT" // Fabric Loom
     id("io.github.p03w.machete") version "1.1.4" // Build jar compression
     id("me.modmuss50.mod-publish-plugin") version "0.4.5" // Mod publishing
 
@@ -55,12 +55,13 @@ dependencies {
     mappings(loom.layered {
         officialMojangMappings()
 
-        if (parchmentVersion.contains(":"))
-            // Use exact version
-            parchment("org.parchmentmc.data:parchment-${parchmentVersion}@zip")
-        else
-            // Use minecraft version + given date
-            parchment("org.parchmentmc.data:parchment-${minecraftVersion}:${parchmentVersion}@zip")
+        if (hasProperty("parchmentVersion"))
+            if (parchmentVersion.contains(":"))
+                // Use exact version
+                parchment("org.parchmentmc.data:parchment-${parchmentVersion}@zip")
+            else
+                // Use minecraft version + given date
+                parchment("org.parchmentmc.data:parchment-${minecraftVersion}:${parchmentVersion}@zip")
     })
     modImplementation("net.fabricmc:fabric-loader:${loaderVersion}")
 
@@ -78,6 +79,7 @@ dependencies {
     // YAML support
     include(implementation("org.snakeyaml:snakeyaml-engine:${property("deps.snakeyaml")}")) {}
 
+    compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     compileOnly("org.eclipse.jdt:org.eclipse.jdt.annotation:${property("deps.jdtAnnotation")}")
 }
 
@@ -163,12 +165,9 @@ tasks {
     }
 
     // Fix machete compression
-    getAllTasks(true).forEach {
-        for (task in it.value) {
-            // All publishing tasks depend on the remapJar task. But also metadata generation.
-            if (task.name.startsWith("publish") || task.name == "generateMetadataFileForJarPublication") {
-                task.dependsOn("optimizeOutputsOfRemapJar")
-            }
+    configureEach {
+        if (name.startsWith("publish") || name == "generateMetadataFileForJarPublication") {
+            dependsOn("optimizeOutputsOfRemapJar")
         }
     }
 }

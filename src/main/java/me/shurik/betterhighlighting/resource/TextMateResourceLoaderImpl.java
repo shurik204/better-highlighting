@@ -48,7 +48,7 @@ public class TextMateResourceLoaderImpl implements IdentifiableResourceReloadLis
     }
 
     @Override
-    public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
+    public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, Executor backgroundExecutor, Executor gameExecutor) {
         // How to handle different file types?
         // 0. Only support one format
         // 1. Priority: .tmlanguage > .tmlanguage.json > .tmlanguage.yaml > .tmlanguage.yml

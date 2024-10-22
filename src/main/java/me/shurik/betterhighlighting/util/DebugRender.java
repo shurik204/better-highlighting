@@ -54,7 +54,7 @@ public class DebugRender {
                     List<Component> tooltipLines = Lists.newArrayList(Component.literal(padded.substring(token.getStartIndex(), token.getEndIndex()).replace(' ', '·')));
                     tooltipLines.add(Component.literal("------------"));
                     tooltipLines.add(Component.literal("Scopes:").withStyle(ChatFormatting.AQUA));
-                    for (String scope : token.getScopes()) {
+                    for (String scope : token.getScopes().reversed()) {
                         tooltipLines.add(Component.literal(scope));
                     }
                     StyleAttributes style = Styler.getTextMateStyle(token);
