@@ -185,13 +185,13 @@ public final class Styler {
     public static Style toMinecraftStyle(StyleAttributes attributes, Theme theme) {
         TextColor color = getTextColor(theme, attributes.foregroundId);
         if (attributes.fontStyle == FontStyle.NotSet) {
-            return StyleAccessor.create(color, null, null, null, null, null, null, null, null, null);
+            return StyleAccessor.create(color, null, null, null, null, null, null, null, null, null, null);
         }
         boolean bold = FontStyle.isBold(attributes.fontStyle);
         boolean italic = FontStyle.isItalic(attributes.fontStyle);
         boolean underline = FontStyle.isUnderline(attributes.fontStyle);
         boolean strikethrough = FontStyle.isStrikethrough(attributes.fontStyle);
-        return StyleAccessor.create(color, bold, italic, underline, strikethrough, null, null, null, null, null);
+        return StyleAccessor.create(color,null, bold, italic, underline, strikethrough, null, null, null, null, null);
     }
 
     /**
