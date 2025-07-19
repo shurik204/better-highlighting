@@ -22,7 +22,6 @@ import org.eclipse.tm4e.core.internal.theme.StyleAttributes;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Optional;
 
 public class DebugRender {
     public static boolean renderScopes(GuiGraphics guiGraphics, int mouseX, int mouseY, EditBox input, @Nullable ParseResults<SharedSuggestionProvider> parseResults) {
@@ -81,7 +80,7 @@ public class DebugRender {
                         tooltipY = Y + 40;
                     }
 
-                    guiGraphics.renderTooltip(font, tooltipLines, Optional.empty(), startX, tooltipY);
+                    guiGraphics.setComponentTooltipForNextFrame(font, tooltipLines, startX, tooltipY);
                 }
             }
             return true;

@@ -24,6 +24,7 @@
     "fabricloader": ">=${modLoader}",
     "fabric-resource-loader-v0": "*",
     "fabric-command-api-v2": "*",
-    "fabric-api-base": "*"
+    "fabric-api-base": "*",
+    "minecraft" : "~1.21.6"
   }
 }
