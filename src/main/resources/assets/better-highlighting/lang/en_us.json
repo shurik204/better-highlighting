@@ -3,6 +3,10 @@
   "text.betterhighlighting.debug.scopes": "Scopes debug tooltip: %s",
   "text.betterhighlighting.debug.reloaded_config": "Reloaded config",
   "text.betterhighlighting.debug.unknown_subcommand": "Unknown subcommand '%s'",
+  "text.betterhighlighting.themes.count": "Themes (%s):",
+  "text.betterhighlighting.themes.item": "  - %s",
+  "text.betterhighlighting.themes.hover": "Click to apply",
+  "text.betterhighlighting.info": "Version: %s by %s",
 
   "text.betterhighlighting.current_theme": "Current theme: %s",
   "text.betterhighlighting.changed_theme": "Changed theme to '%s'",

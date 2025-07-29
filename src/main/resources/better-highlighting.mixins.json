@@ -8,9 +8,12 @@
     "CommandSuggestionsMixin",
     "EditBoxAccessor",
     "ParseResultsMixin",
-    "StyleAccessor",
-    "tm4e.SyncRegistryAccessor",
-    "tm4e.RegistryAccessor"
+    "GuiGraphicsMixin",
+    "ResourceLocationAccessor",
+    "TextColorAccessor",
+    "StyleMixin",
+    "tm4e.RegistryAccessor",
+    "tm4e.SyncRegistryAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

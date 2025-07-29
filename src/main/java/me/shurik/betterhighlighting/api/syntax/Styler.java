@@ -1,8 +1,8 @@
 package me.shurik.betterhighlighting.api.syntax;
 
-import com.mojang.serialization.DataResult;
 import me.shurik.betterhighlighting.api.TextMateRegistry;
-import me.shurik.betterhighlighting.mixin.StyleAccessor;
+import me.shurik.betterhighlighting.util.ColorUtils;
+import me.shurik.betterhighlighting.util.access.StyleModifierAccess;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -183,15 +183,16 @@ public final class Styler {
      * @return Minecraft style
      */
     public static Style toMinecraftStyle(StyleAttributes attributes, Theme theme) {
-        TextColor color = getTextColor(theme, attributes.foregroundId);
+        Style style = Style.EMPTY.withColor(getTextColor(theme, attributes.foregroundId));
         if (attributes.fontStyle == FontStyle.NotSet) {
-            return StyleAccessor.create(color, null, null, null, null, null, null, null, null, null, null);
+            return style;
         }
-        boolean bold = FontStyle.isBold(attributes.fontStyle);
-        boolean italic = FontStyle.isItalic(attributes.fontStyle);
-        boolean underline = FontStyle.isUnderline(attributes.fontStyle);
-        boolean strikethrough = FontStyle.isStrikethrough(attributes.fontStyle);
-        return StyleAccessor.create(color,null, bold, italic, underline, strikethrough, null, null, null, null, null);
+        return ((StyleModifierAccess)style).highlight$updateModifiers(
+                FontStyle.isBold(attributes.fontStyle),
+                FontStyle.isItalic(attributes.fontStyle),
+                FontStyle.isUnderline(attributes.fontStyle),
+                FontStyle.isStrikethrough(attributes.fontStyle)
+        );
     }
 
     /**
@@ -215,8 +216,7 @@ public final class Styler {
      * @return text color
      */
     public static TextColor getTextColor(Theme theme, int id) {
-        String hex = getColorString(theme, id);
-        DataResult<TextColor> result = TextColor.parseColor(hex);
-        return result.result().orElse(DEFAULT_COLOR);
+        TextColor result = ColorUtils.parseColor(getColorString(theme, id));
+        return result != null ? result : DEFAULT_COLOR;
     }
 }

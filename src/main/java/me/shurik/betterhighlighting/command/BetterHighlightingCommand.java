@@ -13,15 +13,18 @@ import me.shurik.betterhighlighting.api.syntax.Tokenizer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.metadata.ModMetadata;
+import net.fabricmc.loader.api.metadata.Person;
 import net.minecraft.locale.Language;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class BetterHighlightingCommand {
     public static boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();
@@ -30,8 +33,7 @@ public class BetterHighlightingCommand {
             "debug", BetterHighlightingCommand::debugToggle,
             "scopes", BetterHighlightingCommand::debugScopes,
             "reload", BetterHighlightingCommand::debugReloadConfig,
-            "config", BetterHighlightingCommand::debugConfig,
-            "themes", BetterHighlightingCommand::debugThemesList
+            "config", BetterHighlightingCommand::debugConfig
     );
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -42,10 +44,7 @@ public class BetterHighlightingCommand {
             return builder.buildFuture();
         }).executes(BetterHighlightingCommand::tryChangeTheme);
 
-        LiteralArgumentBuilder<FabricClientCommandSource> themeNode = ClientCommandManager.literal("theme").executes(context -> {
-            sendPrefixedFeedback(context.getSource(), "text.betterhighlighting.current_theme", Config.INSTANCE.currentTheme);
-            return 0;
-        }).then(themeArg);
+        LiteralArgumentBuilder<FabricClientCommandSource> themeNode = ClientCommandManager.literal("theme").then(themeArg);
 
         RequiredArgumentBuilder<FabricClientCommandSource, String> debugNode = ClientCommandManager.argument("argument", StringArgumentType.word()).executes(context -> {
             String argument = StringArgumentType.getString(context, "argument");
@@ -70,8 +69,30 @@ public class BetterHighlightingCommand {
             return builder.buildFuture();
         });
 
-        LiteralArgumentBuilder<FabricClientCommandSource> rootNode = ClientCommandManager.literal("betterhighlighting").then(themeNode).then(debugNode);
+        LiteralArgumentBuilder<FabricClientCommandSource> rootNode = ClientCommandManager.literal("betterhighlighting").executes(BetterHighlightingCommand::displayInfo).then(themeNode).then(debugNode);
         dispatcher.register(rootNode);
+    }
+
+    private static int displayInfo(CommandContext<FabricClientCommandSource> context) {
+        ModMetadata metadata = FabricLoader.getInstance().getModContainer(BetterHighlighting.MOD_ID).orElseThrow().getMetadata();
+        sendPrefixedFeedback(context.getSource(), "text.betterhighlighting.info", metadata.getVersion(), metadata.getAuthors().stream().map(Person::getName).collect(Collectors.joining(", ")));
+        sendPrefixedFeedback(context.getSource(), "text.betterhighlighting.current_theme", Config.INSTANCE.currentTheme);
+        BetterHighlightingCommand.displayThemeList(context);
+        return 0;
+    }
+
+    private static void displayThemeList(CommandContext<FabricClientCommandSource> ctx) {
+        Set<String> themes = TextMateRegistry.instance().getThemeList();
+        sendPrefixedFeedback(ctx.getSource(), "text.betterhighlighting.themes.count", themes.size());
+        for (String theme : themes) {
+            // TODO: crashes on older versions
+//            MutableComponent item = Component.translatable("text.betterhighlighting.themes.item", theme);
+//            item.withStyle(style ->
+//                style.withHoverEvent(new HoverEvent.ShowText(Component.translatable("text.betterhighlighting.themes.hover")))
+//                     .withClickEvent(new ClickEvent.RunCommand("/betterhighlighting theme " + theme))
+//            );
+            sendPrefixedFeedback(ctx.getSource(), "text.betterhighlighting.themes.item", theme);
+        }
     }
 
     private static Component getPrefix() {
@@ -125,13 +146,6 @@ public class BetterHighlightingCommand {
         sendPrefixedFeedback(ctx.getSource(), "text.betterhighlighting.debug.reloaded_config");
     }
 
-    private static void debugThemesList(CommandContext<FabricClientCommandSource> ctx) {
-        Set<String> themes = TextMateRegistry.instance().getThemeList();
-        sendPrefixedFeedback(ctx.getSource(), "text.betterhighlighting.debug.themes", themes.size());
-        for (String theme : themes) {
-            sendPrefixedFeedback(ctx.getSource(), "text.betterhighlighting.debug.theme", theme);
-        }
-    }
 
     private static void debugConfig(CommandContext<FabricClientCommandSource> ctx) {
         sendPrefixedFeedback(ctx.getSource(), "Begin config");

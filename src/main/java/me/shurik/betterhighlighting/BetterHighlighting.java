@@ -6,6 +6,7 @@ import me.shurik.betterhighlighting.api.TextMateResourceLoader;
 import me.shurik.betterhighlighting.command.BetterHighlightingCommand;
 import me.shurik.betterhighlighting.resource.TextMateResourceLoaderImpl;
 import me.shurik.betterhighlighting.resource.TextMateRegistryImpl;
+import me.shurik.betterhighlighting.util.CompatUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.resources.ResourceLocation;
@@ -37,6 +38,6 @@ public class BetterHighlighting implements ClientModInitializer {
     }
 
     public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+        return CompatUtils.location(MOD_NAME, path);
     }
 }

@@ -6,6 +6,7 @@ import me.shurik.betterhighlighting.api.syntax.Styler;
 import me.shurik.betterhighlighting.api.TextMateRegistry;
 import me.shurik.betterhighlighting.api.access.HighlightTokensAccessor;
 import me.shurik.betterhighlighting.mixin.EditBoxAccessor;
+import me.shurik.betterhighlighting.util.access.TooltipRenderingCompat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -81,7 +82,7 @@ public class DebugRender {
                         tooltipY = Y + 40;
                     }
 
-                    guiGraphics.renderTooltip(font, tooltipLines, Optional.empty(), startX, tooltipY);
+                    ((TooltipRenderingCompat) guiGraphics).renderTooltip(font, tooltipLines, startX, tooltipY);
                 }
             }
             return true;

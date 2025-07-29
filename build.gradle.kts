@@ -1,6 +1,6 @@
 
 plugins {
-    id("fabric-loom") version "1.8-SNAPSHOT" // Fabric Loom
+    id("fabric-loom") version "1.10-SNAPSHOT" // Fabric Loom
     id("io.github.p03w.machete") version "1.1.4" // Build jar compression
     id("me.modmuss50.mod-publish-plugin") version "0.4.5" // Mod publishing
 
@@ -29,7 +29,7 @@ val modName = property("mod.name")
 val modDescription = property("mod.description")
 
 val group = modGroup
-version = "${minecraftVersion}-${modVersion}"
+version = modVersion
 //////
 
 base {

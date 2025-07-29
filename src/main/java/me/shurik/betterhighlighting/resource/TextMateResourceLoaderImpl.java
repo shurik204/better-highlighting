@@ -5,6 +5,7 @@ import me.shurik.betterhighlighting.api.TextMateResourceLoader;
 import me.shurik.betterhighlighting.api.TextMateRegistry;
 import me.shurik.betterhighlighting.api.resource.GrammarResource;
 import me.shurik.betterhighlighting.api.resource.ThemeResource;
+import me.shurik.betterhighlighting.util.CompatUtils;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
@@ -44,7 +45,12 @@ public class TextMateResourceLoaderImpl implements IdentifiableResourceReloadLis
 
     @Override
     public ResourceLocation getFabricId() {
-        return ResourceLocation.fromNamespaceAndPath(modId, grammarPath);
+        return CompatUtils.location(modId, grammarPath);
+    }
+
+    // Below 1.21.2 compatibility
+    public CompletableFuture<Void> method_25931(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
+        return this.reload(preparationBarrier, resourceManager, backgroundExecutor, gameExecutor);
     }
 
     @Override

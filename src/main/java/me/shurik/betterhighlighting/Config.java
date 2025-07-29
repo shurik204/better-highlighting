@@ -6,6 +6,7 @@ import me.shurik.betterhighlighting.api.TextMateRegistry;
 import me.shurik.betterhighlighting.util.ColorUtils;
 import net.fabricmc.loader.api.FabricLoader;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -22,7 +23,7 @@ public class Config {
     public String currentTheme = "Material";
 
     public Integer unmatchedBracketColor = 0xC13328;
-    public List<Integer> bracketColors = List.of(ColorUtils.colorFromHex("#F9D849"), ColorUtils.colorFromHex("#CC76D1"), ColorUtils.colorFromHex("#4A9DF7"));
+    public List<Integer> bracketColors = List.of(ColorUtils.colorFromString("#F9D849"), ColorUtils.colorFromString("#CC76D1"), ColorUtils.colorFromString("#4A9DF7"));
 
     public boolean bracketIndependentColoring = true;
     public boolean enableScopesDebug = false;
@@ -33,7 +34,11 @@ public class Config {
             // Load config from file
             INSTANCE = new Gson().fromJson(reader, Config.class);
         } catch (Exception e) {
-            LOGGER.error("Failed to load config, using default", e);
+            if (e instanceof FileNotFoundException) {
+                LOGGER.warn("Config file not found, using default");
+            } else {
+                LOGGER.error("Failed to load config file, using default", e);
+            }
             INSTANCE = new Config();
         }
 
