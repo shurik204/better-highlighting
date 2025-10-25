@@ -1,6 +1,7 @@
 package me.shurik.betterhighlighting.util;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.brigadier.ParseResults;
 import me.shurik.betterhighlighting.api.syntax.Styler;
 import me.shurik.betterhighlighting.api.TextMateRegistry;
@@ -12,7 +13,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -21,13 +21,23 @@ import org.eclipse.tm4e.core.grammar.ITokenizeLineResult;
 import org.eclipse.tm4e.core.internal.theme.FontStyle;
 import org.eclipse.tm4e.core.internal.theme.StyleAttributes;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Optional;
 
 public class DebugRender {
+    private static long windowHandle = -1;
+
+    private static boolean isKeyDown(int keyCode) {
+        return GLFW.glfwGetKey(windowHandle, keyCode) == 1;
+    }
+
     public static boolean renderScopes(GuiGraphics guiGraphics, int mouseX, int mouseY, EditBox input, @Nullable ParseResults<SharedSuggestionProvider> parseResults) {
-        if (parseResults != null && Screen.hasAltDown()) {
+        if (windowHandle == -1) {
+            windowHandle = initWindowHandle(Minecraft.getInstance().getWindow());
+        }
+        if (parseResults != null && (isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) || isKeyDown(GLFW.GLFW_KEY_RIGHT_ALT))) {
             ITokenizeLineResult<IToken[]> tokenizationResult = ((HighlightTokensAccessor) parseResults).highlight$getTokenizationResult();
             String padded = input.getValue() + " ";
             Font font = ((EditBoxAccessor) input).getFont();
@@ -55,8 +65,10 @@ public class DebugRender {
                     List<Component> tooltipLines = Lists.newArrayList(Component.literal(padded.substring(token.getStartIndex(), token.getEndIndex()).replace(' ', '·')));
                     tooltipLines.add(Component.literal("------------"));
                     tooltipLines.add(Component.literal("Scopes:").withStyle(ChatFormatting.AQUA));
-                    for (String scope : token.getScopes().reversed()) {
-                        tooltipLines.add(Component.literal(scope));
+                    // 1.20.1 reports that List.reversed() does not exist ???
+                    List<String> scopes = token.getScopes();
+                    for (int i = scopes.size() - 1; i >= 0; i--) {
+                        tooltipLines.add(Component.literal(scopes.get(i)));
                     }
                     StyleAttributes style = Styler.getTextMateStyle(token);
                     Style mcStyle = Styler.toMinecraftStyle(style, TextMateRegistry.instance().getCurrentTheme());
@@ -88,5 +100,13 @@ public class DebugRender {
             return true;
         }
         return false;
+    }
+
+    private static long initWindowHandle(Window window) {
+        try {
+            return (long) window.getClass().getMethod("method_4490").invoke(window);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            return window.handle();
+        }
     }
 }

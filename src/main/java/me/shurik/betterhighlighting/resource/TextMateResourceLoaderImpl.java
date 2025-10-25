@@ -16,9 +16,11 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+@ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class TextMateResourceLoaderImpl implements IdentifiableResourceReloadListener, TextMateResourceLoader {
     public static final TextMateResourceLoaderImpl INSTANCE = new TextMateResourceLoaderImpl();
@@ -50,11 +52,11 @@ public class TextMateResourceLoaderImpl implements IdentifiableResourceReloadLis
 
     // Below 1.21.2 compatibility
     public CompletableFuture<Void> method_25931(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
-        return this.reload(preparationBarrier, resourceManager, backgroundExecutor, gameExecutor);
+        return this.method_25931(preparationBarrier, resourceManager, backgroundExecutor, gameExecutor);
     }
 
-    @Override
-    public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, Executor backgroundExecutor, Executor gameExecutor) {
+    // 1.21.2-1.21.8 compatibility
+    public CompletableFuture<Void> method_25931(PreparationBarrier preparationBarrier, ResourceManager resourceManager, Executor backgroundExecutor, Executor gameExecutor) {
         // How to handle different file types?
         // 0. Only support one format
         // 1. Priority: .tmlanguage > .tmlanguage.json > .tmlanguage.yaml > .tmlanguage.yml
@@ -67,6 +69,12 @@ public class TextMateResourceLoaderImpl implements IdentifiableResourceReloadLis
                                 .thenCompose(preparationBarrier::wait)
                                 // and finally invoke the reload event
                                  .thenRunAsync(() -> reloadEvent.invoker().invoke(registry), gameExecutor);
+    }
+
+    // 1.21.10
+    @Override
+    public CompletableFuture<Void> reload(SharedState state, Executor prepareExecutor, PreparationBarrier reloadSynchronizer, Executor applyExecutor) {
+        return method_25931(reloadSynchronizer, state.resourceManager(), prepareExecutor, applyExecutor);
     }
 
     private void reloadResources(ResourceManager resourceManager) {

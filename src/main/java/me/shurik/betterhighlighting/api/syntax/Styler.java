@@ -187,7 +187,7 @@ public final class Styler {
         if (attributes.fontStyle == FontStyle.NotSet) {
             return style;
         }
-        return ((StyleModifierAccess)style).highlight$updateModifiers(
+        return ((StyleModifierAccess) (Object) style).highlight$updateModifiers(
                 FontStyle.isBold(attributes.fontStyle),
                 FontStyle.isItalic(attributes.fontStyle),
                 FontStyle.isUnderline(attributes.fontStyle),
