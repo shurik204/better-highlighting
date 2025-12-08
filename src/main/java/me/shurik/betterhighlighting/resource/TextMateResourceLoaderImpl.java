@@ -10,18 +10,18 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
+@NonNullByDefault
 public class TextMateResourceLoaderImpl implements IdentifiableResourceReloadListener, TextMateResourceLoader {
     public static final TextMateResourceLoaderImpl INSTANCE = new TextMateResourceLoaderImpl();
 
@@ -46,8 +46,8 @@ public class TextMateResourceLoaderImpl implements IdentifiableResourceReloadLis
     }
 
     @Override
-    public ResourceLocation getFabricId() {
-        return CompatUtils.location(modId, grammarPath);
+    public Identifier getFabricId() {
+        return CompatUtils.identifier(modId, grammarPath);
     }
 
     // Below 1.21.2 compatibility
@@ -88,11 +88,11 @@ public class TextMateResourceLoaderImpl implements IdentifiableResourceReloadLis
         BetterHighlighting.LOGGER.info("Loaded {} grammars and {} themes", registry.getGrammarList().size(), registry.getThemeList().size());
     }
 
-    private static boolean isGrammar(ResourceLocation id) {
+    private static boolean isGrammar(Identifier id) {
         return id.getNamespace().equals(BetterHighlighting.MOD_ID) && (id.getPath().endsWith(".tmlanguage") || id.getPath().endsWith(".tmlanguage.json") || id.getPath().endsWith(".tmlanguage.yaml") || id.getPath().endsWith(".tmlanguage.yml"));
     }
 
-    private static boolean isTheme(ResourceLocation id) {
+    private static boolean isTheme(Identifier id) {
         return id.getNamespace().equals(BetterHighlighting.MOD_ID) && (id.getPath().endsWith(".tmtheme") || id.getPath().endsWith(".tmtheme.json") || id.getPath().endsWith(".tmtheme.yaml") || id.getPath().endsWith(".tmtheme.yml"));
     }
 

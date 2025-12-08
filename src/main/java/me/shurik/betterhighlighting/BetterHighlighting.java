@@ -9,7 +9,7 @@ import me.shurik.betterhighlighting.resource.TextMateRegistryImpl;
 import me.shurik.betterhighlighting.util.CompatUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ public class BetterHighlighting implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> BetterHighlightingCommand.register(dispatcher));
     }
 
-    public static ResourceLocation id(String path) {
-        return CompatUtils.location(MOD_NAME, path);
+    public static Identifier id(String path) {
+        return CompatUtils.identifier(MOD_NAME, path);
     }
 }

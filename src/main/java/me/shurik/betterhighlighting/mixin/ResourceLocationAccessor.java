@@ -1,13 +1,13 @@
 package me.shurik.betterhighlighting.mixin;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(ResourceLocation.class)
+@Mixin(Identifier.class)
 public interface ResourceLocationAccessor {
     @Invoker("<init>")
-    static ResourceLocation create(String namespace, String path) { throw new AssertionError("???"); }
+    static Identifier create(String namespace, String path) { throw new AssertionError("???"); }
     @Invoker("assertValidNamespace")
     static String assertValidNamespace(String namespace, String path) { throw new AssertionError("???"); }
     @Invoker("assertValidPath")

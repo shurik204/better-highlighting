@@ -1,8 +1,8 @@
 package me.shurik.betterhighlighting.api.resource;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.tm4e.core.registry.IGrammarSource;
 
 import java.io.IOException;
@@ -13,8 +13,8 @@ import java.io.Reader;
  * @param location resource location
  * @param resource minecraft resource
  */
-@MethodsReturnNonnullByDefault
-public record GrammarResource(ResourceLocation location, Resource resource) implements IGrammarSource {
+@NonNullByDefault
+public record GrammarResource(Identifier location, Resource resource) implements IGrammarSource {
     @Override
     public String getFilePath() {
         return location.toString();

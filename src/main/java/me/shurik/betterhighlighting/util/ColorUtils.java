@@ -1,9 +1,9 @@
 package me.shurik.betterhighlighting.util;
 
 import me.shurik.betterhighlighting.mixin.TextColorAccessor;
-import net.minecraft.Util;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
