@@ -40,13 +40,18 @@ public class DebugRender {
         if (parseResults != null && (isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) || isKeyDown(GLFW.GLFW_KEY_RIGHT_ALT))) {
             ITokenizeLineResult<IToken[]> tokenizationResult = ((HighlightTokensAccessor) parseResults).highlight$getTokenizationResult();
             String padded = input.getValue() + " ";
-            Font font = ((EditBoxAccessor) input).getFont();
+            EditBoxAccessor inputAccessor = (EditBoxAccessor) input;
+            Font font = inputAccessor.getFont();
 
             int Y = input.getY() - 2;
+            // Don't bother with hidden parts of the string
+            int shownLength = font.plainSubstrByWidth(input.getValue().substring(inputAccessor.getDisplayPos()), input.getInnerWidth()).length();
+            int maxX = inputAccessor.getTextX() + input.getInnerWidth();
             for (IToken token : tokenizationResult.getTokens()) {
+                if (token.getEndIndex() <= inputAccessor.getDisplayPos() || token.getStartIndex() > inputAccessor.getDisplayPos() + shownLength) continue;
                 int startX;
                 try {
-                    startX = font.width(padded.substring(0, token.getStartIndex())) + input.getX();
+                    startX = font.width(padded.substring(inputAccessor.getDisplayPos(), Math.max(token.getStartIndex(), inputAccessor.getDisplayPos()))) + inputAccessor.getTextX();
                 } catch (Exception e) {
                     Minecraft.getInstance().gui.setOverlayMessage(Component.literal("Error X: " + e.getMessage()), false);
                     return false;
@@ -59,8 +64,9 @@ public class DebugRender {
                     Minecraft.getInstance().gui.setOverlayMessage(Component.literal("Error width: " + e.getMessage()), false);
                     return false;
                 }
-                int endX = startX + width;
-                guiGraphics.fill(startX, Y, endX, Y + 1, token.getScopes().hashCode() * 11);
+                // Limit the last rectangle to the rendered text width
+                int endX = Math.min(startX + width, maxX);
+                guiGraphics.fill(startX, Y, endX, Y + input.getHeight(), token.getScopes().hashCode() * 11 & 0x00FFFFFF | 0x4F000000);
                 if (input.getCursorPosition() <= token.getEndIndex() && input.getCursorPosition() > token.getStartIndex()) {
                     List<Component> tooltipLines = Lists.newArrayList(Component.literal(padded.substring(token.getStartIndex(), token.getEndIndex()).replace(' ', '·')));
                     tooltipLines.add(Component.literal("------------"));

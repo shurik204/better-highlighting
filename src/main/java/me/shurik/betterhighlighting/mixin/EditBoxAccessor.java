@@ -9,4 +9,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface EditBoxAccessor {
     @Accessor
     Font getFont();
+
+    @Accessor
+    int getDisplayPos();
+
+    @Accessor
+    int getTextX();
 }
