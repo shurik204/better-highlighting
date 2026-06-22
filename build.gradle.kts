@@ -1,15 +1,16 @@
 
 plugins {
-    id("fabric-loom") version "1.13-SNAPSHOT" // Fabric Loom
+    id("fabric-loom") version "1.17-SNAPSHOT" // Fabric Loom
     id("io.github.p03w.machete") version "2.0.1" // Build jar compression
     id("me.modmuss50.mod-publish-plugin") version "1.1.0" // Mod publishing
 
     id("maven-publish") // Maven publishing
     id("java")
+    id("idea")
 }
 
 //////
-fun property(name: String): String = project.properties[name].toString()
+fun property(name: String): String = project.findProperty(name).toString()
 fun fabricApiModule(name: String, version: String? = null): Dependency {
     if (version == null) {
         return fabricApi.module(name, (project.findProperty("deps.fabricApi") ?: throw IllegalArgumentException("Fabric API version (deps.fabricApi) is not set")).toString())
