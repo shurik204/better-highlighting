@@ -10,10 +10,10 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Style.class)
 public class StyleMixin implements StyleModifierAccess {
-    @Shadow @Final @Mutable @Nullable Boolean bold;
-    @Shadow @Final @Mutable @Nullable Boolean italic;
-    @Shadow @Final @Mutable @Nullable Boolean underlined;
-    @Shadow @Final @Mutable @Nullable Boolean strikethrough;
+    @Shadow @Final @Mutable @Nullable private Boolean bold;
+    @Shadow @Final @Mutable @Nullable private Boolean italic;
+    @Shadow @Final @Mutable @Nullable private Boolean underlined;
+    @Shadow @Final @Mutable @Nullable private Boolean strikethrough;
 
     @Override
     public Style highlight$updateModifiers(boolean bold, boolean italic, boolean underlined, boolean strikethrough) {

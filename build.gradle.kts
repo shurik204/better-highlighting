@@ -1,8 +1,8 @@
 
 plugins {
-    id("fabric-loom") version "1.17-SNAPSHOT" // Fabric Loom
+    id("net.fabricmc.fabric-loom") version "1.17-SNAPSHOT" // Fabric Loom
     id("io.github.p03w.machete") version "2.0.1" // Build jar compression
-    id("me.modmuss50.mod-publish-plugin") version "1.1.0" // Mod publishing
+    id("me.modmuss50.mod-publish-plugin") version "2.0.1" // Mod publishing
 
     id("maven-publish") // Maven publishing
     id("java")
@@ -10,7 +10,8 @@ plugins {
 }
 
 //////
-fun property(name: String): String = project.findProperty(name).toString()
+fun findProperty(name: String): String? = project.findProperty(name) as String?
+fun property(name: String): String = project.property(name) as String
 fun fabricApiModule(name: String, version: String? = null): Dependency {
     if (version == null) {
         return fabricApi.module(name, (project.findProperty("deps.fabricApi") ?: throw IllegalArgumentException("Fabric API version (deps.fabricApi) is not set")).toString())
@@ -21,7 +22,7 @@ fun fabricApiModule(name: String, version: String? = null): Dependency {
 val javaVersion = JavaVersion.forClassVersion(44 + property("mod.java").toInt())
 val minecraftVersion = property("mod.minecraft")
 val loaderVersion = property("mod.loader")
-val parchmentVersion = property("mod.parchment")
+val parchmentVersion = findProperty("mod.parchment")
 
 val modVersion: String = file("VERSION").readText().trim()
 val modGroup = property("mod.group")
@@ -52,24 +53,12 @@ loom {
 dependencies {
     minecraft("com.mojang:minecraft:${minecraftVersion}")
 
-    @Suppress("UnstableApiUsage")
-    mappings(loom.layered {
-        officialMojangMappings()
-
-        if (hasProperty("parchmentVersion"))
-            if (parchmentVersion.contains(":"))
-                // Use exact version
-                parchment("org.parchmentmc.data:parchment-${parchmentVersion}@zip")
-            else
-                // Use minecraft version + given date
-                parchment("org.parchmentmc.data:parchment-${minecraftVersion}:${parchmentVersion}@zip")
-    })
-    modImplementation("net.fabricmc:fabric-loader:${loaderVersion}")
+    implementation("net.fabricmc:fabric-loader:${loaderVersion}")
 
     // Fabric API
-    modImplementation(fabricApiModule("fabric-api-base"))
-    modImplementation(fabricApiModule("fabric-resource-loader-v0"))
-    modImplementation(fabricApiModule("fabric-command-api-v2"))
+    implementation(fabricApiModule("fabric-api-base"))
+    implementation(fabricApiModule("fabric-resource-loader-v0"))
+    implementation(fabricApiModule("fabric-command-api-v2"))
 
     // TM4E
     include(implementation("org.eclipse:org.eclipse.tm4e.core:${property("deps.tm4e")}")) {}
@@ -120,7 +109,7 @@ tasks {
     }
 
     publishMods {
-        file = remapJar.get().archiveFile
+        file = jar.get().archiveFile
         changelog = providers.environmentVariable("CHANGELOG").getOrElse("No changelog provided")
         type = BETA
         displayName = "$modName $modVersion"

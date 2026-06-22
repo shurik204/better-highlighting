@@ -11,7 +11,7 @@ import me.shurik.betterhighlighting.util.access.TooltipRenderingCompat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
@@ -33,7 +33,7 @@ public class DebugRender {
         return GLFW.glfwGetKey(windowHandle, keyCode) == 1;
     }
 
-    public static boolean renderScopes(GuiGraphics guiGraphics, int mouseX, int mouseY, EditBox input, @Nullable ParseResults<SharedSuggestionProvider> parseResults) {
+    public static boolean renderScopes(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, EditBox input, @Nullable ParseResults<SharedSuggestionProvider> parseResults) {
         if (windowHandle == -1) {
             windowHandle = initWindowHandle(Minecraft.getInstance().getWindow());
         }
@@ -53,7 +53,9 @@ public class DebugRender {
                 try {
                     startX = font.width(padded.substring(inputAccessor.getDisplayPos(), Math.max(token.getStartIndex(), inputAccessor.getDisplayPos()))) + inputAccessor.getTextX();
                 } catch (Exception e) {
-                    Minecraft.getInstance().gui.setOverlayMessage(Component.literal("Error X: " + e.getMessage()), false);
+                    // setOverlayMessage was moved to Minecraft.gui.hud in 26.2
+                    // TODO: mixin @Unique Gui.setOverlayMessage with a call to Minecraft.gui.hud.setOverlayMessage
+                    // Minecraft.getInstance().gui.setOverlayMessage(Component.literal("Error X: " + e.getMessage()), false);
                     return false;
                 }
                 int width;
@@ -61,7 +63,7 @@ public class DebugRender {
                     // TODO: trailing space causes exception
                     width = font.width(padded.substring(token.getStartIndex(), token.getEndIndex()));
                 } catch (Exception e) {
-                    Minecraft.getInstance().gui.setOverlayMessage(Component.literal("Error width: " + e.getMessage()), false);
+                    // Minecraft.getInstance().gui.setOverlayMessage(Component.literal("Error width: " + e.getMessage()), false);
                     return false;
                 }
                 // Limit the last rectangle to the rendered text width

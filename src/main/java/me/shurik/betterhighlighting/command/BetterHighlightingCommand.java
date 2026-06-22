@@ -10,7 +10,7 @@ import me.shurik.betterhighlighting.Config;
 import me.shurik.betterhighlighting.api.BuiltinGrammar;
 import me.shurik.betterhighlighting.api.TextMateRegistry;
 import me.shurik.betterhighlighting.api.syntax.Tokenizer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
@@ -20,7 +20,6 @@ import net.minecraft.network.chat.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -37,16 +36,16 @@ public class BetterHighlightingCommand {
     );
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        RequiredArgumentBuilder<FabricClientCommandSource, String> themeArg = ClientCommandManager.argument("theme", StringArgumentType.greedyString()).suggests((context, builder) -> {
+        RequiredArgumentBuilder<FabricClientCommandSource, String> themeArg = ClientCommands.argument("theme", StringArgumentType.greedyString()).suggests((context, builder) -> {
             for (String theme : TextMateRegistry.instance().getThemeList()) {
                 if (theme.startsWith(builder.getRemaining())) { builder.suggest(theme); }
             }
             return builder.buildFuture();
         }).executes(BetterHighlightingCommand::tryChangeTheme);
 
-        LiteralArgumentBuilder<FabricClientCommandSource> themeNode = ClientCommandManager.literal("theme").then(themeArg);
+        LiteralArgumentBuilder<FabricClientCommandSource> themeNode = ClientCommands.literal("theme").then(themeArg);
 
-        RequiredArgumentBuilder<FabricClientCommandSource, String> debugNode = ClientCommandManager.argument("argument", StringArgumentType.word()).executes(context -> {
+        RequiredArgumentBuilder<FabricClientCommandSource, String> debugNode = ClientCommands.argument("argument", StringArgumentType.word()).executes(context -> {
             String argument = StringArgumentType.getString(context, "argument");
 
             if (argument.equals("debug")) {
@@ -69,7 +68,7 @@ public class BetterHighlightingCommand {
             return builder.buildFuture();
         });
 
-        LiteralArgumentBuilder<FabricClientCommandSource> rootNode = ClientCommandManager.literal("betterhighlighting").executes(BetterHighlightingCommand::displayInfo).then(themeNode).then(debugNode);
+        LiteralArgumentBuilder<FabricClientCommandSource> rootNode = ClientCommands.literal("betterhighlighting").executes(BetterHighlightingCommand::displayInfo).then(themeNode).then(debugNode);
         dispatcher.register(rootNode);
     }
 
