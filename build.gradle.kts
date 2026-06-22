@@ -157,7 +157,7 @@ tasks {
     // Fix machete compression
     configureEach {
         if (name.startsWith("publish") || name == "generateMetadataFileForJarPublication") {
-            dependsOn("optimizeOutputsOfRemapJar")
+            dependsOn("optimizeOutputsOfJar")
         }
     }
 }
