@@ -3,15 +3,18 @@
   "minVersion": "0.8",
   "package": "me.shurik.betterhighlighting.mixin",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [],
+  "mixins": [
+  ],
   "client": [
     "CommandSuggestionsMixin",
     "EditBoxAccessor",
-    "ParseResultsMixin",
     "GuiGraphicsExtractorMixin",
-    "ResourceLocationAccessor",
-    "TextColorAccessor",
+    "ParseResultsMixin",
     "StyleMixin",
+    "TextColorAccessor",
+    "compat.InputConstantsAccessor",
+    "compat.InputConstantsMixin",
+    "compat.ResourceManagerMixin",
     "tm4e.RegistryAccessor",
     "tm4e.SyncRegistryAccessor"
   ],

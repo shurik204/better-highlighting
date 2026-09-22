@@ -1,6 +1,6 @@
 
 plugins {
-    id("net.fabricmc.fabric-loom") version "1.17-SNAPSHOT" // Fabric Loom
+    id("net.fabricmc.fabric-loom") version "1.18-SNAPSHOT" // Fabric Loom
     id("io.github.p03w.machete") version "2.0.1" // Build jar compression
     id("me.modmuss50.mod-publish-plugin") version "2.0.1" // Mod publishing
 

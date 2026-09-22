@@ -1,12 +1,13 @@
 package me.shurik.betterhighlighting.util;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.ParseResults;
 import me.shurik.betterhighlighting.api.syntax.Styler;
 import me.shurik.betterhighlighting.api.TextMateRegistry;
 import me.shurik.betterhighlighting.api.access.HighlightTokensAccessor;
 import me.shurik.betterhighlighting.mixin.EditBoxAccessor;
+import me.shurik.betterhighlighting.mixin.compat.InputConstantsAccessor;
 import me.shurik.betterhighlighting.util.access.TooltipRenderingCompat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -21,23 +22,17 @@ import org.eclipse.tm4e.core.grammar.ITokenizeLineResult;
 import org.eclipse.tm4e.core.internal.theme.FontStyle;
 import org.eclipse.tm4e.core.internal.theme.StyleAttributes;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 public class DebugRender {
-    private static long windowHandle = -1;
+    public static InputConstants.Key debugKey = InputConstants.getKey("key.keyboard.left.alt");
 
-    private static boolean isKeyDown(int keyCode) {
-        return GLFW.glfwGetKey(windowHandle, keyCode) == 1;
+    public static boolean isKeyDown(InputConstants.Key key) {
+        return InputConstantsAccessor.compat$isKeyDown(Minecraft.getInstance().getWindow(), key.getValue());
     }
 
     public static boolean renderScopes(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, EditBox input, @Nullable ParseResults<SharedSuggestionProvider> parseResults) {
-        if (windowHandle == -1) {
-            windowHandle = initWindowHandle(Minecraft.getInstance().getWindow());
-        }
-        if (parseResults != null && (isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) || isKeyDown(GLFW.GLFW_KEY_RIGHT_ALT))) {
+        if (parseResults != null && isKeyDown(debugKey)) {
             ITokenizeLineResult<IToken[]> tokenizationResult = ((HighlightTokensAccessor) parseResults).highlight$getTokenizationResult();
             String padded = input.getValue() + " ";
             EditBoxAccessor inputAccessor = (EditBoxAccessor) input;
@@ -108,13 +103,5 @@ public class DebugRender {
             return true;
         }
         return false;
-    }
-
-    private static long initWindowHandle(Window window) {
-        try {
-            return (long) window.getClass().getMethod("method_4490").invoke(window);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            return window.handle();
-        }
     }
 }

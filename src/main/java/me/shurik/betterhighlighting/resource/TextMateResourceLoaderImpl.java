@@ -6,12 +6,16 @@ import me.shurik.betterhighlighting.api.TextMateRegistry;
 import me.shurik.betterhighlighting.api.resource.GrammarResource;
 import me.shurik.betterhighlighting.api.resource.ThemeResource;
 import me.shurik.betterhighlighting.util.CompatUtils;
+import me.shurik.betterhighlighting.util.access.ResourceManagerCompat;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -19,35 +23,41 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @ParametersAreNonnullByDefault
 @NonNullByDefault
-public class TextMateResourceLoaderImpl implements IdentifiableResourceReloadListener, TextMateResourceLoader {
+public class TextMateResourceLoaderImpl implements PreparableReloadListener, TextMateResourceLoader {
     public static final TextMateResourceLoaderImpl INSTANCE = new TextMateResourceLoaderImpl();
 
     private final Event<TextMateResourceLoader.Callback> reloadEvent = EventFactory.createArrayBacked(TextMateResourceLoader.Callback.class, (listeners) -> (registry) -> {
         for (TextMateResourceLoader.Callback listener : listeners) { listener.invoke(registry); }
     });
-    private final String modId;
     private final String grammarPath;
     private final String themePath;
     private final TextMateRegistry registry;
+    private final Identifier id;
 
     public TextMateResourceLoaderImpl() {
         this(BetterHighlighting.MOD_ID, "grammar", "theme", TextMateRegistry.instance());
     }
 
     public TextMateResourceLoaderImpl(String modId, String grammarPath, String themePath, TextMateRegistry registry) {
-        this.modId = modId;
+        this.id = CompatUtils.identifier(modId, grammarPath);
         this.grammarPath = grammarPath;
         this.themePath = themePath;
         this.registry = registry;
-        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
+        ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloadListener(id, this);
+    }
+
+    public Identifier id() {
+        return id;
     }
 
     @Override
-    public Identifier getFabricId() {
-        return CompatUtils.identifier(modId, grammarPath);
+    public String getName() {
+        return id.toString();
     }
 
     // Below 1.21.2 compatibility
@@ -64,7 +74,7 @@ public class TextMateResourceLoaderImpl implements IdentifiableResourceReloadLis
         // 3. \/ (current) load all files and let the registry handle it
 
         // Run the reload on a separate thread,
-        return CompletableFuture.runAsync(() -> this.reloadResources(resourceManager), backgroundExecutor)
+        return CompletableFuture.runAsync(() -> this.reloadResources((ResourceManagerCompat) resourceManager), backgroundExecutor)
                                 // signal the preparation barrier,
                                 .thenCompose(preparationBarrier::wait)
                                 // and finally invoke the reload event
@@ -77,7 +87,7 @@ public class TextMateResourceLoaderImpl implements IdentifiableResourceReloadLis
         return method_25931(reloadSynchronizer, state.resourceManager(), prepareExecutor, applyExecutor);
     }
 
-    private void reloadResources(ResourceManager resourceManager) {
+    private void reloadResources(ResourceManagerCompat resourceManager) {
         registry.reset();
         resourceManager.listResources(grammarPath, TextMateResourceLoaderImpl::isGrammar).forEach((id, resource) -> {
             registry.registerGrammar(new GrammarResource(id, resource));
